@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Leaf, ShieldCheck, BadgeCheck, Star } from "lucide-react";
+import { Leaf, BadgeCheck, Star } from "lucide-react";
 
 const features = [
   {
@@ -10,13 +10,6 @@ const features = [
     description: "Используем только безопасные гипоаллергенные средства, безвредные для детей и животных.",
     color: "text-brand-mint",
     bg: "bg-brand-mint/10",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Фикс. цена",
-    description: "Стоимость фиксируется до начала работ и не меняется в процессе уборки.",
-    color: "text-brand-blue",
-    bg: "bg-brand-blue/10",
   },
   {
     icon: BadgeCheck,
@@ -55,7 +48,7 @@ const itemVariants = {
 
 export default function Features() {
   return (
-    <section id="features" className="py-24 relative">
+    <section id="features" className="py-24 relative scroll-mt-24">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <motion.h2
@@ -83,13 +76,13 @@ export default function Features() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
-          className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8"
+          className="grid sm:grid-cols-1 md:grid-cols-3 gap-8"
         >
           {features.map((feature, index) => (
             <motion.div
               key={index}
               variants={itemVariants}
-              className="glass-card p-8 group"
+              className="glass-card p-8 group text-center sm:text-left flex flex-col items-center sm:items-start"
             >
               <div
                 className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-transform group-hover:scale-110 ${feature.bg} ${feature.color}`}

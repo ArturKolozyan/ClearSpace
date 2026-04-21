@@ -7,7 +7,7 @@ import { Send, CheckCircle2, AlertCircle } from "lucide-react";
 export default function ContactForm() {
   const [formData, setFormData] = useState({
     name: "",
-    phone: "",
+    phone: "+7 ",
     message: "",
   });
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -15,6 +15,15 @@ export default function ContactForm() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    
+    // Keep +7 prefix for phone
+    if (name === "phone") {
+      if (!value.startsWith("+7 ")) {
+        setFormData((prev) => ({ ...prev, phone: "+7 " }));
+        return;
+      }
+    }
+    
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -22,7 +31,7 @@ export default function ContactForm() {
     e.preventDefault();
     
     // Basic validation
-    if (!formData.name.trim() || !formData.phone.trim()) {
+    if (!formData.name.trim() || formData.phone.trim() === "+7") {
       setStatus("error");
       setErrorMessage("Пожалуйста, заполните обязательные поля (Имя и Телефон).");
       return;
@@ -59,7 +68,7 @@ export default function ContactForm() {
       }
 
       setStatus("success");
-      setFormData({ name: "", phone: "", message: "" });
+      setFormData({ name: "", phone: "+7 ", message: "" });
       
       // Reset success message after 5 seconds
       setTimeout(() => {
@@ -73,16 +82,16 @@ export default function ContactForm() {
   };
 
   return (
-    <section id="contact" className="py-24 relative overflow-hidden">
+    <section id="contact" className="py-24 relative overflow-hidden scroll-mt-24">
       {/* Background Elements */}
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-transparent to-blue-50/50" />
       <div className="absolute top-0 right-0 -z-10 w-[800px] h-[800px] bg-brand-blue/5 rounded-full mix-blend-multiply filter blur-3xl opacity-50 translate-x-1/3 -translate-y-1/4" />
       <div className="absolute bottom-0 left-0 -z-10 w-[600px] h-[600px] bg-brand-mint/5 rounded-full mix-blend-multiply filter blur-3xl opacity-50 -translate-x-1/3 translate-y-1/4" />
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-2xl mx-auto glass-card p-10 lg:p-12 shadow-2xl shadow-blue-900/10 border-white/60">
+        <div className="max-w-2xl mx-auto glass-card p-8 sm:p-10 lg:p-12 shadow-2xl shadow-blue-900/10 border-white/60">
           <h3 className="text-3xl font-bold mb-8 text-slate-900 text-center">Оставьте заявку</h3>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6 text-left">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-2">
                 Ваше имя <span className="text-brand-blue">*</span>

@@ -16,7 +16,6 @@ const services = [
       "Обеспыливание поверхностей",
       "Дезинфекция санузлов",
     ],
-    popular: true,
   },
   {
     id: "cars",
@@ -29,7 +28,6 @@ const services = [
       "Обработка пластика",
       "Устранение запахов",
     ],
-    popular: false,
   },
   {
     id: "furniture",
@@ -42,13 +40,12 @@ const services = [
       "Чистка матрасов и диванов",
       "Антибактериальная обработка",
     ],
-    popular: false,
   },
 ];
 
 export default function Services() {
   return (
-    <section id="services" className="py-24 relative bg-slate-50/50">
+    <section id="services" className="py-24 relative bg-slate-50/50 scroll-mt-24">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <motion.h2
@@ -79,24 +76,16 @@ export default function Services() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className={`glass-card relative flex flex-col h-full overflow-hidden ${
-                service.popular ? "border-brand-blue/50 ring-1 ring-brand-blue/20" : ""
-              }`}
+              className="glass-card flex flex-col h-full overflow-hidden text-center sm:text-left"
             >
-              {service.popular && (
-                <div className="absolute top-0 inset-x-0 bg-gradient-to-r from-brand-blue to-brand-lavender text-white text-xs font-bold uppercase tracking-wider py-1.5 text-center">
-                  Хит продаж
-                </div>
-              )}
-              
-              <div className={`p-8 flex-grow flex flex-col ${service.popular ? "pt-12" : ""}`}>
+              <div className="p-8 flex-grow flex flex-col items-center sm:items-start">
                 <h3 className="text-2xl font-bold text-slate-900 mb-2">{service.title}</h3>
                 <div className="text-3xl font-extrabold text-brand-blue mb-4">{service.price}</div>
                 <p className="text-slate-600 mb-8 flex-grow">{service.description}</p>
                 
-                <ul className="space-y-4 mb-8">
+                <ul className="space-y-4 mb-8 w-full text-left">
                   {service.features.map((feature, i) => (
-                    <li key={i} className="flex items-start gap-3">
+                    <li key={i} className="flex items-start gap-3 justify-center sm:justify-start">
                       <CheckCircle2 className="text-brand-mint shrink-0 mt-0.5" size={20} />
                       <span className="text-slate-700 text-sm leading-tight">{feature}</span>
                     </li>
@@ -105,11 +94,7 @@ export default function Services() {
                 
                 <Link
                   href="#contact"
-                  className={`w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${
-                    service.popular
-                      ? "bg-brand-blue text-white hover:bg-sky-500 shadow-md shadow-brand-blue/20 hover:-translate-y-0.5"
-                      : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                  }`}
+                  className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium transition-all bg-slate-100 text-slate-700 hover:bg-slate-200"
                 >
                   Заказать
                   <ArrowRight size={18} />

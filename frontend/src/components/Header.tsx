@@ -11,7 +11,6 @@ const navLinks = [
   { name: "Услуги", href: "#services" },
   { name: "Портфолио", href: "#portfolio" },
   { name: "Отзывы", href: "#testimonials" },
-  { name: "FAQ", href: "#faq" },
 ];
 
 export default function Header() {
@@ -95,7 +94,7 @@ export default function Header() {
             exit={{ opacity: 0, y: -20 }}
             className="absolute top-full left-0 right-0 bg-white/90 backdrop-blur-xl border-b border-white/50 shadow-lg md:hidden"
           >
-            <nav className="flex flex-col px-4 py-6 gap-4">
+            <nav className="flex flex-col px-4 py-6 gap-4 text-center">
               {navLinks.map((link) => (
                 <Link
                   key={link.name}

@@ -10,7 +10,7 @@
 
 @layer base {
   body {
-    @apply bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 text-slate-600 font-sans antialiased min-h-screen selection:bg-brand-blue/20 selection:text-brand-blue;
+    @apply bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 bg-fixed text-slate-600 font-sans antialiased min-h-screen selection:bg-brand-blue/20 selection:text-brand-blue;
   }
   
   h1, h2, h3, h4, h5, h6 {

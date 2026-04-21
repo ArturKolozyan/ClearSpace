@@ -35,7 +35,7 @@ const testimonials = [
 
 export default function Testimonials() {
   return (
-    <section id="testimonials" className="py-24 relative bg-slate-50/50">
+    <section id="testimonials" className="py-24 relative bg-slate-50/50 scroll-mt-24">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <motion.h2
@@ -66,21 +66,21 @@ export default function Testimonials() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="glass-card p-8 relative"
+              className="glass-card p-8 relative text-center sm:text-left flex flex-col items-center sm:items-start"
             >
               <Quote className="absolute top-6 right-6 text-slate-200" size={48} />
               
-              <div className="flex items-center gap-4 mb-6">
+              <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
                 <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-md ${testimonial.color}`}>
                   {testimonial.avatar}
                 </div>
-                <div>
+                <div className="text-center sm:text-left">
                   <h4 className="font-bold text-slate-900">{testimonial.name}</h4>
                   <p className="text-sm text-slate-500">{testimonial.role}</p>
                 </div>
               </div>
               
-              <div className="flex gap-1 mb-4">
+              <div className="flex gap-1 mb-4 justify-center sm:justify-start">
                 {[...Array(testimonial.rating)].map((_, i) => (
                   <Star key={i} size={18} className="fill-amber-400 text-amber-400" />
                 ))}
