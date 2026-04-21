@@ -53,9 +53,9 @@ export default function Footer() {
           <div className="text-center md:text-left">
             <h4 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">Связаться с нами</h4>
             <ul className="space-y-4 flex flex-col items-center md:items-start">
-              <li className="flex items-start gap-3">
+              <li className="flex flex-col md:flex-row items-center md:items-start gap-3">
                 <Phone size={20} className="text-brand-blue shrink-0 mt-0.5" />
-                <div className="text-left">
+                <div className="text-center md:text-left">
                   <a href="tel:+78000000000" className="text-sm hover:text-brand-blue transition-colors block mb-1">+7 (800) 000-00-00</a>
                   <span className="text-xs text-slate-500 block">Ежедневно с 9:00 до 21:00</span>
                 </div>

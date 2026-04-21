@@ -33,7 +33,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru" className={`${inter.variable} ${manrope.variable} scroll-smooth`}>
-      <body className="font-sans text-slate-600 bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 bg-fixed min-h-screen selection:bg-brand-blue/20 selection:text-brand-blue leading-relaxed">
+      <body className="font-sans text-slate-600 bg-blue-50/50 min-h-screen selection:bg-brand-blue/20 selection:text-brand-blue leading-relaxed">
         {children}
       </body>
     </html>

@@ -96,7 +96,7 @@ export default function Services() {
                   href="#contact"
                   className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium transition-all bg-slate-100 text-slate-700 hover:bg-slate-200"
                 >
-                  Заказать
+                  Оставить заявку
                   <ArrowRight size={18} />
                 </Link>
               </div>

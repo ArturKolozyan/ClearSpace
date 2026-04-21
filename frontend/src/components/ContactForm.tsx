@@ -3,22 +3,12 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Send, CheckCircle2, AlertCircle } from "lucide-react";
-
-const formatPhoneNumber = (value: string) => {
-  if (!value) return "+7 ";
-  const phoneNumber = value.replace(/[^\d]/g, "");
-  const phoneNumberLength = phoneNumber.length;
-  if (phoneNumberLength < 2) return "+7 ";
-  if (phoneNumberLength < 5) return `+7 (${phoneNumber.slice(1, 4)}`;
-  if (phoneNumberLength < 8) return `+7 (${phoneNumber.slice(1, 4)}) ${phoneNumber.slice(4, 7)}`;
-  if (phoneNumberLength < 10) return `+7 (${phoneNumber.slice(1, 4)}) ${phoneNumber.slice(4, 7)}-${phoneNumber.slice(7, 9)}`;
-  return `+7 (${phoneNumber.slice(1, 4)}) ${phoneNumber.slice(4, 7)}-${phoneNumber.slice(7, 9)}-${phoneNumber.slice(9, 11)}`;
-};
+import InputMask from "react-input-mask";
 
 export default function ContactForm() {
   const [formData, setFormData] = useState({
     name: "",
-    phone: "+7 ",
+    phone: "",
     message: "",
   });
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -26,12 +16,6 @@ export default function ContactForm() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    
-    if (name === "phone") {
-      setFormData((prev) => ({ ...prev, phone: formatPhoneNumber(value) }));
-      return;
-    }
-    
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -39,7 +23,7 @@ export default function ContactForm() {
     e.preventDefault();
     
     // Basic validation
-    if (!formData.name.trim() || formData.phone.trim() === "+7") {
+    if (!formData.name.trim() || !formData.phone.trim()) {
       setStatus("error");
       setErrorMessage("Пожалуйста, заполните обязательные поля (Имя и Телефон).");
       return;
@@ -49,7 +33,7 @@ export default function ContactForm() {
     const phoneDigits = formData.phone.replace(/[^\d]/g, "");
     if (phoneDigits.length < 11) {
       setStatus("error");
-      setErrorMessage("Пожалуйста, введите корректный номер телефона (10 цифр).");
+      setErrorMessage("Пожалуйста, введите корректный номер телефона.");
       return;
     }
 
@@ -76,7 +60,7 @@ export default function ContactForm() {
       }
 
       setStatus("success");
-      setFormData({ name: "", phone: "+7 ", message: "" });
+      setFormData({ name: "", phone: "", message: "" });
       
       // Reset success message after 5 seconds
       setTimeout(() => {
@@ -119,13 +103,13 @@ export default function ContactForm() {
               <label htmlFor="phone" className="block text-sm font-medium text-slate-700 mb-2">
                 Телефон <span className="text-brand-blue">*</span>
               </label>
-              <input
-                type="tel"
+              <InputMask
+                mask="+7 (999) 999-99-99"
                 id="phone"
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                placeholder="+7 (999) 000-00-00"
+                placeholder="+7 (___) ___-__-__"
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/80 focus:bg-white focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition-all"
                 disabled={status === "loading" || status === "success"}
               />
