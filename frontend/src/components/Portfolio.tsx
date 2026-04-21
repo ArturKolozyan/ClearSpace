@@ -4,24 +4,12 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 
 const portfolioItems = [
-  {
-    id: 1,
-    src: "/foto1.jpg",
-    title: "Генеральная уборка квартиры",
-    category: "Квартиры",
-  },
-  {
-    id: 2,
-    src: "/foto2.jpg",
-    title: "Химчистка салона автомобиля",
-    category: "Авто",
-  },
-  {
-    id: 3,
-    src: "/foto3.jpg",
-    title: "Мойка мягкой мебели",
-    category: "Мебель",
-  },
+  { id: 1, src: "/foto1.jpg" },
+  { id: 2, src: "/foto2.jpg" },
+  { id: 3, src: "/foto3.jpg" },
+  { id: 4, src: "/foto1.jpg" },
+  { id: 5, src: "/foto2.jpg" },
+  { id: 6, src: "/foto3.jpg" },
 ];
 
 export default function Portfolio() {
@@ -52,30 +40,20 @@ export default function Portfolio() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {portfolioItems.map((item, index) => (
             <motion.div
-              key={item.id}
+              key={`${item.id}-${index}`}
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
+              transition={{ duration: 0.5, delay: (index % 3) * 0.1 }}
               className="group relative rounded-[2rem] overflow-hidden aspect-[4/3] shadow-lg shadow-blue-900/5 cursor-pointer"
             >
               <Image
                 src={item.src}
-                alt={item.title}
+                alt="Пример работы"
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-110"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
-              
-              {/* Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-8">
-                <span className="inline-block px-3 py-1 bg-brand-blue/90 backdrop-blur-sm text-white text-xs font-bold rounded-full mb-3 w-max">
-                  {item.category}
-                </span>
-                <h3 className="text-xl font-bold text-white leading-tight">
-                  {item.title}
-                </h3>
-              </div>
             </motion.div>
           ))}
         </div>
