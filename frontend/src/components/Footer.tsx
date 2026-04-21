@@ -8,8 +8,8 @@ export default function Footer() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           {/* Brand */}
-          <div className="col-span-1 lg:col-span-1">
-            <Link href="/" className="flex items-center gap-2 mb-6">
+          <div className="col-span-1 lg:col-span-1 text-center md:text-left">
+            <Link href="/" className="flex items-center justify-center md:justify-start gap-2 mb-6">
               <div className="relative w-10 h-10 overflow-hidden rounded-xl bg-white">
                 <Image
                   src="/logo.png"
@@ -29,7 +29,7 @@ export default function Footer() {
           </div>
 
           {/* Links */}
-          <div>
+          <div className="text-center md:text-left">
             <h4 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">Услуги</h4>
             <ul className="space-y-3">
               <li><Link href="#services" className="text-sm hover:text-brand-blue transition-colors">Частные дома и квартиры</Link></li>
@@ -39,24 +39,23 @@ export default function Footer() {
           </div>
 
           {/* Company */}
-          <div>
+          <div className="text-center md:text-left">
             <h4 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">Компания</h4>
             <ul className="space-y-3">
               <li><Link href="#features" className="text-sm hover:text-brand-blue transition-colors">О нас</Link></li>
               <li><Link href="#portfolio" className="text-sm hover:text-brand-blue transition-colors">Наши работы</Link></li>
               <li><Link href="#testimonials" className="text-sm hover:text-brand-blue transition-colors">Отзывы</Link></li>
-              <li><Link href="#faq" className="text-sm hover:text-brand-blue transition-colors">Вопросы и ответы</Link></li>
               <li><Link href="#contact" className="text-sm hover:text-brand-blue transition-colors">Контакты</Link></li>
             </ul>
           </div>
 
           {/* Contact */}
-          <div>
+          <div className="text-center md:text-left">
             <h4 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">Связаться с нами</h4>
-            <ul className="space-y-4">
+            <ul className="space-y-4 flex flex-col items-center md:items-start">
               <li className="flex items-start gap-3">
                 <Phone size={20} className="text-brand-blue shrink-0 mt-0.5" />
-                <div>
+                <div className="text-left">
                   <a href="tel:+78000000000" className="text-sm hover:text-brand-blue transition-colors block mb-1">+7 (800) 000-00-00</a>
                   <span className="text-xs text-slate-500 block">Ежедневно с 9:00 до 21:00</span>
                 </div>
@@ -65,11 +64,11 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
           <p className="text-sm text-slate-500">
             &copy; {new Date().getFullYear()} ClearSpace. Все права защищены.
           </p>
-          <div className="flex gap-6">
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
             <Link href="#" className="text-sm text-slate-500 hover:text-white transition-colors">Политика конфиденциальности</Link>
             <Link href="#" className="text-sm text-slate-500 hover:text-white transition-colors">Пользовательское соглашение</Link>
           </div>

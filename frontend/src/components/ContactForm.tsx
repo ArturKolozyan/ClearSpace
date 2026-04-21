@@ -4,6 +4,17 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Send, CheckCircle2, AlertCircle } from "lucide-react";
 
+const formatPhoneNumber = (value: string) => {
+  if (!value) return "+7 ";
+  const phoneNumber = value.replace(/[^\d]/g, "");
+  const phoneNumberLength = phoneNumber.length;
+  if (phoneNumberLength < 2) return "+7 ";
+  if (phoneNumberLength < 5) return `+7 (${phoneNumber.slice(1, 4)}`;
+  if (phoneNumberLength < 8) return `+7 (${phoneNumber.slice(1, 4)}) ${phoneNumber.slice(4, 7)}`;
+  if (phoneNumberLength < 10) return `+7 (${phoneNumber.slice(1, 4)}) ${phoneNumber.slice(4, 7)}-${phoneNumber.slice(7, 9)}`;
+  return `+7 (${phoneNumber.slice(1, 4)}) ${phoneNumber.slice(4, 7)}-${phoneNumber.slice(7, 9)}-${phoneNumber.slice(9, 11)}`;
+};
+
 export default function ContactForm() {
   const [formData, setFormData] = useState({
     name: "",
@@ -16,12 +27,9 @@ export default function ContactForm() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     
-    // Keep +7 prefix for phone
     if (name === "phone") {
-      if (!value.startsWith("+7 ")) {
-        setFormData((prev) => ({ ...prev, phone: "+7 " }));
-        return;
-      }
+      setFormData((prev) => ({ ...prev, phone: formatPhoneNumber(value) }));
+      return;
     }
     
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -37,11 +45,11 @@ export default function ContactForm() {
       return;
     }
 
-    // Phone validation (simple regex for Russian numbers)
-    const phoneRegex = /^(\+7|7|8)?[\s\-]?\(?[489][0-9]{2}\)?[\s\-]?[0-9]{3}[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}$/;
-    if (!phoneRegex.test(formData.phone.replace(/\s+/g, ''))) {
+    // Phone validation
+    const phoneDigits = formData.phone.replace(/[^\d]/g, "");
+    if (phoneDigits.length < 11) {
       setStatus("error");
-      setErrorMessage("Пожалуйста, введите корректный номер телефона.");
+      setErrorMessage("Пожалуйста, введите корректный номер телефона (10 цифр).");
       return;
     }
 
@@ -84,7 +92,6 @@ export default function ContactForm() {
   return (
     <section id="contact" className="py-24 relative overflow-hidden scroll-mt-24">
       {/* Background Elements */}
-      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-transparent to-blue-50/50" />
       <div className="absolute top-0 right-0 -z-10 w-[800px] h-[800px] bg-brand-blue/5 rounded-full mix-blend-multiply filter blur-3xl opacity-50 translate-x-1/3 -translate-y-1/4" />
       <div className="absolute bottom-0 left-0 -z-10 w-[600px] h-[600px] bg-brand-mint/5 rounded-full mix-blend-multiply filter blur-3xl opacity-50 -translate-x-1/3 translate-y-1/4" />
 
