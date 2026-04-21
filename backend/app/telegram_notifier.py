@@ -262,7 +262,15 @@ async def on_done(callback: CallbackQuery) -> None:
 
 
 async def run_polling() -> None:
-    await dispatcher.start_polling(bot)
+    while True:
+        try:
+            await bot.delete_webhook(drop_pending_updates=False)
+            await dispatcher.start_polling(bot, drop_pending_updates=False)
+            return
+        except asyncio.CancelledError:
+            raise
+        except Exception:  # noqa: BLE001
+            await asyncio.sleep(5)
 
 
 async def close_bot() -> None:

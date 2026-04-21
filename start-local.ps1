@@ -18,7 +18,7 @@ python -m pip install -r "backend/requirements.txt"
 Pop-Location
 
 Write-Host "Launching backend on http://127.0.0.1:8000" -ForegroundColor Green
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot'; python -m uvicorn backend.app.main:app --reload --host 127.0.0.1 --port 8000"
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$projectRoot'; python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000"
 
 Write-Host "Launching frontend on http://localhost:3000" -ForegroundColor Green
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$frontendDir'; npm run dev"
