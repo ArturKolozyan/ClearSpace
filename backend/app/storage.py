@@ -136,11 +136,13 @@ def cleanup_old_archived_leads() -> int:
     original_count = len(data)
     kept = []
     for item in data:
-        if item.get("status") != "done":
-            kept.append(item)
-            continue
-        done_at = _parse_dt(item.get("done_at"))
-        if done_at >= threshold:
+        # For completed leads use completion date, for active/new leads use creation date.
+        status = item.get("status")
+        if status == "done":
+            reference_dt = _parse_dt(item.get("done_at"))
+        else:
+            reference_dt = _parse_dt(item.get("created_at"))
+        if reference_dt >= threshold:
             kept.append(item)
     removed = original_count - len(kept)
     if removed > 0:
