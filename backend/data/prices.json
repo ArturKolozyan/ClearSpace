@@ -1,0 +1,44 @@
+[
+  {
+    "key": "cleaning",
+    "title": "Клининг",
+    "accent": "teal",
+    "items": [
+      {
+        "title": "Уборка после ремонта",
+        "price_from": 4500
+      },
+      {
+        "title": "Поддерживающая уборка",
+        "price_from": 2500
+      },
+      {
+        "title": "Генеральная уборка",
+        "price_from": 3900
+      }
+    ]
+  },
+  {
+    "key": "dry_cleaning",
+    "title": "Химчистка",
+    "accent": "sand",
+    "items": [
+      {
+        "title": "Диваны",
+        "price_from": 1800
+      },
+      {
+        "title": "Ковры",
+        "price_from": 900
+      },
+      {
+        "title": "Матрасы",
+        "price_from": 1500
+      },
+      {
+        "title": "Шторы",
+        "price_from": 700
+      }
+    ]
+  }
+]

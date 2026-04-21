@@ -1,0 +1,165 @@
+@import "tailwindcss";
+
+:root {
+  --background: #dff7f6;
+  --foreground: #07334d;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background:
+    radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.85), transparent 33%),
+    radial-gradient(circle at 85% 0%, rgba(169, 240, 240, 0.55), transparent 30%),
+    linear-gradient(145deg, #c7f3ef 0%, #d5ebff 48%, #f2fbfc 100%);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+}
+
+.glass-btn,
+.water-btn {
+  position: relative;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.35);
+  color: #07445f;
+  padding: 0.7rem 1.2rem;
+  font-weight: 600;
+  backdrop-filter: blur(12px);
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.water-btn::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 0;
+  background: linear-gradient(180deg, rgba(82, 219, 232, 0.35) 0%, rgba(47, 168, 207, 0.7) 100%);
+  transition: height 0.32s ease;
+  z-index: -1;
+}
+
+.water-btn:hover::before {
+  height: 100%;
+}
+
+.glass-btn:hover,
+.water-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px -18px rgba(7, 68, 95, 0.7);
+}
+
+.glass-input {
+  width: 100%;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.55);
+  color: #07334d;
+  padding: 0.9rem 1rem;
+  outline: none;
+}
+
+.glass-input:focus {
+  border-color: rgba(45, 173, 211, 0.7);
+  box-shadow: 0 0 0 3px rgba(108, 219, 240, 0.25);
+}
+
+.service-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.service-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(85, 211, 237, 0.7);
+  box-shadow: 0 20px 28px -20px rgba(7, 68, 95, 0.7);
+}
+
+.bubble {
+  position: absolute;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.7), rgba(138, 229, 242, 0.3));
+  animation: floatUp 12s ease-in-out infinite;
+}
+
+.bubble-1 {
+  width: 130px;
+  height: 130px;
+  left: -20px;
+  top: 120px;
+}
+
+.bubble-2 {
+  width: 90px;
+  height: 90px;
+  right: 8%;
+  top: 260px;
+  animation-delay: 1.5s;
+}
+
+.bubble-3 {
+  width: 66px;
+  height: 66px;
+  left: 52%;
+  top: 540px;
+  animation-delay: 2.5s;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(2px);
+  animation: bob 5s ease-in-out infinite;
+}
+
+.orb-a {
+  width: 150px;
+  height: 150px;
+  left: 20%;
+  top: 15%;
+  background: rgba(136, 229, 244, 0.7);
+}
+
+.orb-b {
+  width: 120px;
+  height: 120px;
+  right: 10%;
+  bottom: 10%;
+  background: rgba(255, 255, 255, 0.85);
+  animation-delay: 0.8s;
+}
+
+.orb-c {
+  width: 80px;
+  height: 80px;
+  left: 50%;
+  bottom: 22%;
+  background: rgba(121, 205, 230, 0.75);
+  animation-delay: 1.6s;
+}
+
+@keyframes floatUp {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-16px);
+  }
+}
+
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
