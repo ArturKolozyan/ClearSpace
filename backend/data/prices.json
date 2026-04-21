@@ -1,43 +1,23 @@
 [
   {
-    "key": "cleaning",
-    "title": "Клининг",
-    "accent": "teal",
+    "key": "services",
+    "title": "Услуги",
+    "accent": "sky",
     "items": [
       {
-        "title": "Уборка после ремонта",
-        "price_from": 3000
+        "key": "houses",
+        "title": "Частные дома и квартиры",
+        "price_from": 111111
       },
       {
-        "title": "Поддерживающая уборка",
-        "price_from": 2500
+        "key": "cars",
+        "title": "Машины",
+        "price_from": 4000
       },
       {
-        "title": "Генеральная уборка",
-        "price_from": 3900
-      }
-    ]
-  },
-  {
-    "key": "dry_cleaning",
-    "title": "Химчистка",
-    "accent": "sand",
-    "items": [
-      {
-        "title": "Диваны",
-        "price_from": 1800
-      },
-      {
-        "title": "Ковры",
-        "price_from": 900
-      },
-      {
-        "title": "Матрасы",
-        "price_from": 1500
-      },
-      {
-        "title": "Шторы",
-        "price_from": 1111111111
+        "key": "furniture",
+        "title": "Мебель",
+        "price_from": 1200
       }
     ]
   }

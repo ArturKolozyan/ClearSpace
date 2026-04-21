@@ -10,9 +10,9 @@ export default function Hero() {
   const y2 = useTransform(scrollY, [0, 500], [0, -100]);
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center pt-20">
       {/* Background Bubbles */}
-      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+      <div className="absolute inset-0 -z-10 pointer-events-none overflow-hidden">
         <motion.div
           style={{ y: y1 }}
           className="absolute top-20 left-10 w-72 h-72 bg-brand-blue/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"

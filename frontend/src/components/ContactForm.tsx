@@ -3,19 +3,36 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Send, CheckCircle2, AlertCircle } from "lucide-react";
-import InputMask from "react-input-mask";
 
 export default function ContactForm() {
   const [formData, setFormData] = useState({
     name: "",
-    phone: "",
+    phone: "+7 ",
     message: "",
   });
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
+
+  const formatPhoneNumber = (value: string) => {
+    if (!value) return "+7 ";
+    const phoneNumber = value.replace(/[^\d]/g, "");
+    const phoneNumberLength = phoneNumber.length;
+    if (phoneNumberLength < 2) return "+7 ";
+    if (phoneNumberLength < 5) return `+7 (${phoneNumber.slice(1, 4)}`;
+    if (phoneNumberLength < 8) return `+7 (${phoneNumber.slice(1, 4)}) ${phoneNumber.slice(4, 7)}`;
+    if (phoneNumberLength < 10) return `+7 (${phoneNumber.slice(1, 4)}) ${phoneNumber.slice(4, 7)}-${phoneNumber.slice(7, 9)}`;
+    return `+7 (${phoneNumber.slice(1, 4)}) ${phoneNumber.slice(4, 7)}-${phoneNumber.slice(7, 9)}-${phoneNumber.slice(9, 11)}`;
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    
+    if (name === "phone") {
+      setFormData((prev) => ({ ...prev, phone: formatPhoneNumber(value) }));
+      return;
+    }
+    
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -23,7 +40,7 @@ export default function ContactForm() {
     e.preventDefault();
     
     // Basic validation
-    if (!formData.name.trim() || !formData.phone.trim()) {
+    if (!formData.name.trim() || formData.phone.trim() === "+7") {
       setStatus("error");
       setErrorMessage("Пожалуйста, заполните обязательные поля (Имя и Телефон).");
       return;
@@ -33,7 +50,7 @@ export default function ContactForm() {
     const phoneDigits = formData.phone.replace(/[^\d]/g, "");
     if (phoneDigits.length < 11) {
       setStatus("error");
-      setErrorMessage("Пожалуйста, введите корректный номер телефона.");
+      setErrorMessage("Пожалуйста, введите корректный номер телефона (10 цифр).");
       return;
     }
 
@@ -42,7 +59,7 @@ export default function ContactForm() {
 
     try {
       // API call to backend
-      const response = await fetch("http://127.0.0.1:8000/api/leads", {
+      const response = await fetch(`${apiBase}/api/leads`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -50,8 +67,7 @@ export default function ContactForm() {
         body: JSON.stringify({
           name: formData.name,
           phone: formData.phone,
-          service: "Лендинг", // Default service
-          message: formData.message || undefined,
+          comment: formData.message,
         }),
       });
 
@@ -60,7 +76,7 @@ export default function ContactForm() {
       }
 
       setStatus("success");
-      setFormData({ name: "", phone: "", message: "" });
+      setFormData({ name: "", phone: "+7 ", message: "" });
       
       // Reset success message after 5 seconds
       setTimeout(() => {
@@ -103,8 +119,8 @@ export default function ContactForm() {
               <label htmlFor="phone" className="block text-sm font-medium text-slate-700 mb-2">
                 Телефон <span className="text-brand-blue">*</span>
               </label>
-              <InputMask
-                mask="+7 (999) 999-99-99"
+              <input
+                type="tel"
                 id="phone"
                 name="phone"
                 value={formData.phone}

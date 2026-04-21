@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 
 
 class ServiceItem(BaseModel):
+    key: str
     title: str
     price_from: int = Field(ge=0)
 

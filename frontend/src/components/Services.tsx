@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { CheckCircle2, ArrowRight } from "lucide-react";
 import Link from "next/link";
@@ -43,7 +44,56 @@ const services = [
   },
 ];
 
+type ApiPriceItem = {
+  key: string;
+  title: string;
+  price_from: number;
+};
+
+type ApiPriceCategory = {
+  key: string;
+  items: ApiPriceItem[];
+};
+
 export default function Services() {
+  const [prices, setPrices] = useState<Record<string, number>>({});
+  const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const loadPrices = async () => {
+      try {
+        const response = await fetch(`${apiBase}/api/prices`, { signal: controller.signal });
+        if (!response.ok) {
+          return;
+        }
+        const data = (await response.json()) as ApiPriceCategory[];
+        const servicesCategory = data.find((category) => category.key === "services");
+        if (!servicesCategory) {
+          return;
+        }
+        const nextPrices = servicesCategory.items.reduce<Record<string, number>>((acc, item) => {
+          acc[item.key] = item.price_from;
+          return acc;
+        }, {});
+        setPrices(nextPrices);
+      } catch {
+        // Keep static fallback prices if API is unavailable.
+      }
+    };
+    void loadPrices();
+    return () => controller.abort();
+  }, [apiBase]);
+
+  const servicesWithActualPrices = useMemo(
+    () =>
+      services.map((service) => ({
+        ...service,
+        price: `от ${(prices[service.id] ?? Number(service.price.replace(/\D/g, ""))).toLocaleString("ru-RU")} ₽`,
+      })),
+    [prices]
+  );
+
   return (
     <section id="services" className="py-24 relative scroll-mt-24">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -69,7 +119,7 @@ export default function Services() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {services.map((service, index) => (
+          {servicesWithActualPrices.map((service, index) => (
             <motion.div
               key={service.id}
               initial={{ opacity: 0, y: 20 }}

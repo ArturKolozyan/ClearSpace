@@ -4,12 +4,12 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 
 const portfolioItems = [
-  { id: 1, src: "/foto1.jpg" },
-  { id: 2, src: "/foto2.jpg" },
-  { id: 3, src: "/foto3.jpg" },
-  { id: 4, src: "/foto4.jpg" },
-  { id: 5, src: "/foto5.jpg" },
-  { id: 6, src: "/foto6.jpg" },
+  { id: 1, src: "/portfolio-1.jpg" },
+  { id: 2, src: "/portfolio-2.jpg" },
+  { id: 3, src: "/portfolio-3.jpg" },
+  { id: 4, src: "/portfolio-4.jpg" },
+  { id: 5, src: "/portfolio-5.jpg" },
+  { id: 6, src: "/portfolio-6.jpg" },
 ];
 
 export default function Portfolio() {
@@ -33,7 +33,7 @@ export default function Portfolio() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="text-lg text-slate-600 text-balance"
           >
-            Результаты нашей работы говорят сами за себя. Фотографии "До/После".
+            Результаты нашей работы говорят сами за себя. Фотографии &quot;До/После&quot;.
           </motion.p>
         </div>
 

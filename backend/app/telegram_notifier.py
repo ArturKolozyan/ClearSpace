@@ -11,6 +11,7 @@ from .storage import (
     cleanup_old_archived_leads,
     list_active_leads,
     list_archived_leads,
+    mark_lead_active,
     mark_lead_done,
     read_prices,
     set_tg_message_id,
@@ -20,32 +21,40 @@ from .storage import (
 bot = Bot(token=settings.bot_token)
 dispatcher = Dispatcher()
 PAGE_SIZE = 5
-pending_price_updates: dict[int, tuple[str, str]] = {}
+pending_price_updates: dict[int, tuple[str, str, str]] = {}
+
+
+def _sticker_number(index: int) -> str:
+    stickers = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+    if 1 <= index <= len(stickers):
+        return stickers[index - 1]
+    return f"{index}."
 
 
 def _build_message(lead: LeadRecord) -> str:
-    local_time = lead.created_at.astimezone().strftime("%H:%M")
+    local_time = lead.created_at.astimezone().strftime("%d.%m.%Y, %H:%M")
     comment = lead.comment.strip() or "Без комментария"
     return (
-        "📦 НОВЫЙ ЗАКАЗ: ClearSpace\n\n"
-        f"👤 Клиент: {lead.name}\n"
-        f"📞 Связь: {lead.phone}\n"
-        f"💬 Пожелания: {comment}\n\n"
-        f"🕒 Время заявки: {local_time}"
+        "📦 Новая заявка\n\n"
+        f"👤 {lead.name}\n"
+        f"📞 {lead.phone}\n"
+        f"💬 \"{comment}\"\n"
+        f"🕒 {local_time}"
     )
 
 
 def _done_keyboard(lead_id: str) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
-    keyboard.button(text="Завершить", callback_data=f"done:{lead_id}")
+    keyboard.button(text="✅ Завершить", callback_data=f"done:{lead_id}")
     return keyboard.as_markup()
 
 
 def _menu_keyboard() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text="📥 Активные заказы"), KeyboardButton(text="🗂 Архив заказов")],
-            [KeyboardButton(text="⚙️ Настройки цен")],
+            [KeyboardButton(text="📥 Заявки")],
+            [KeyboardButton(text="⚙️ Настройки")],
+            [KeyboardButton(text="🗂 Архив заявок")],
         ],
         resize_keyboard=True,
     )
@@ -54,29 +63,16 @@ def _menu_keyboard() -> ReplyKeyboardMarkup:
 def _active_orders_text(leads: list[LeadRecord], page: int, total_pages: int) -> str:
     lines = [f"📥 Активные заказы • Страница {page}/{total_pages}", ""]
     for index, lead in enumerate(leads, start=1):
-        created = lead.created_at.astimezone().strftime("%d.%m.%Y %H:%M")
+        created = lead.created_at.astimezone().strftime("%d.%m.%Y, %H:%M")
         comment = lead.comment.strip() or "Без комментария"
+        marker = _sticker_number(index)
         lines.append(
-            f"{index}. {lead.name}\n"
-            f"   📞 {lead.phone}\n"
-            f"   💬 {comment}\n"
-            f"   🕒 {created}"
+            f"{marker} 👤 {lead.name}\n"
+            f"📞 {lead.phone}\n"
+            f"💬 \"{comment}\"\n"
+            f"🕒 {created}"
         )
     return "\n\n".join(lines)
-
-
-def _build_archive_message(lead: LeadRecord) -> str:
-    created = lead.created_at.astimezone().strftime("%d.%m.%Y %H:%M")
-    done = lead.done_at.astimezone().strftime("%d.%m.%Y %H:%M") if lead.done_at else "—"
-    comment = lead.comment.strip() or "Без комментария"
-    return (
-        "🗂 ЗАВЕРШЕННЫЙ ЗАКАЗ: ClearSpace\n\n"
-        f"👤 Клиент: {lead.name}\n"
-        f"📞 Связь: {lead.phone}\n"
-        f"💬 Пожелания: {comment}\n"
-        f"🕒 Создан: {created}\n"
-        f"✅ Завершен: {done}"
-    )
 
 
 def _orders_page_keyboard(page: int, total_pages: int) -> InlineKeyboardMarkup:
@@ -85,7 +81,7 @@ def _orders_page_keyboard(page: int, total_pages: int) -> InlineKeyboardMarkup:
     start = (page - 1) * PAGE_SIZE
     chunk = leads[start : start + PAGE_SIZE]
     for idx, lead in enumerate(chunk, start=1):
-        keyboard.button(text=f"✅ Завершить #{idx}", callback_data=f"done:{lead.id}")
+        keyboard.button(text=f"{_sticker_number(idx)} Завершить", callback_data=f"done:{lead.id}")
 
     if page > 1:
         keyboard.button(text="⬅️ Назад", callback_data=f"orders:page:{page - 1}")
@@ -98,11 +94,16 @@ def _orders_page_keyboard(page: int, total_pages: int) -> InlineKeyboardMarkup:
 
 def _archive_page_keyboard(page: int, total_pages: int) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
+    leads = list_archived_leads()
+    start = (page - 1) * PAGE_SIZE
+    chunk = leads[start : start + PAGE_SIZE]
+    for idx, lead in enumerate(chunk, start=1):
+        keyboard.button(text=f"{_sticker_number(idx)} В активные", callback_data=f"restore:{lead.id}")
     if page > 1:
         keyboard.button(text="⬅️ Назад", callback_data=f"archive:page:{page - 1}")
     if page < total_pages:
         keyboard.button(text="Вперед ➡️", callback_data=f"archive:page:{page + 1}")
-    keyboard.adjust(2)
+    keyboard.adjust(1)
     return keyboard.as_markup()
 
 
@@ -125,13 +126,16 @@ async def _send_orders_page(message: Message, page: int = 1) -> None:
 def _archive_page_text(leads: list[LeadRecord], page: int, total_pages: int) -> str:
     lines = [f"🗂 Архив заказов • Страница {page}/{total_pages}", ""]
     for index, lead in enumerate(leads, start=1):
-        created = lead.created_at.astimezone().strftime("%d.%m.%Y %H:%M")
-        done = lead.done_at.astimezone().strftime("%d.%m.%Y %H:%M") if lead.done_at else "—"
+        created = lead.created_at.astimezone().strftime("%d.%m.%Y, %H:%M")
+        done = lead.done_at.astimezone().strftime("%d.%m.%Y, %H:%M") if lead.done_at else "—"
+        comment = lead.comment.strip() or "Без комментария"
+        marker = _sticker_number(index)
         lines.append(
-            f"{index}. {lead.name}\n"
-            f"   📞 {lead.phone}\n"
-            f"   🕒 Создан: {created}\n"
-            f"   ✅ Завершен: {done}"
+            f"{marker} 👤 {lead.name}\n"
+            f"📞 {lead.phone}\n"
+            f"💬 \"{comment}\"\n"
+            f"🕒 Создан: {created}\n"
+            f"✅ Завершен: {done}"
         )
     return "\n\n".join(lines)
 
@@ -147,28 +151,26 @@ async def _send_archive_page(message: Message, page: int = 1) -> None:
     chunk = leads[start : start + PAGE_SIZE]
     await message.answer(
         _archive_page_text(chunk, safe_page, total_pages),
-        reply_markup=_archive_page_keyboard(safe_page, total_pages) if total_pages > 1 else None,
+        reply_markup=_archive_page_keyboard(safe_page, total_pages),
     )
+
+
+def _services_prices() -> tuple[str, dict[str, tuple[str, int]]]:
+    category = next((cat for cat in read_prices() if cat.key == "services"), None)
+    if category is None:
+        raise RuntimeError("Category 'services' not found in prices.json")
+
+    mapped: dict[str, tuple[str, int]] = {}
+    for item in category.items:
+        mapped[item.key] = (item.title, item.price_from)
+    return category.key, mapped
 
 
 def _settings_keyboard() -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
-    for category in read_prices():
-        keyboard.button(text=category.title, callback_data=f"settings:cat:{category.key}")
-    keyboard.adjust(1)
-    return keyboard.as_markup()
-
-
-def _category_items_keyboard(category_key: str) -> InlineKeyboardMarkup:
-    keyboard = InlineKeyboardBuilder()
-    category = next((cat for cat in read_prices() if cat.key == category_key), None)
-    if category is None:
-        return keyboard.as_markup()
-    for item in category.items:
-        keyboard.button(
-            text=f"{item.title} ({item.price_from} ₽)",
-            callback_data=f"settings:item:{category.key}:{item.title}",
-        )
+    category_key, services = _services_prices()
+    for item_key, (title, price) in services.items():
+        keyboard.button(text=f"{title} ({price} ₽)", callback_data=f"settings:item:{category_key}:{item_key}")
     keyboard.adjust(1)
     return keyboard.as_markup()
 
@@ -193,19 +195,19 @@ async def on_start(message: Message) -> None:
     )
 
 
-@dispatcher.message(F.text == "📥 Активные заказы")
+@dispatcher.message(F.text == "📥 Заявки")
 async def on_orders_menu(message: Message) -> None:
     await _send_orders_page(message, page=1)
 
 
-@dispatcher.message(F.text == "🗂 Архив заказов")
+@dispatcher.message(F.text == "🗂 Архив заявок")
 async def on_archive_menu(message: Message) -> None:
     await _send_archive_page(message, page=1)
 
 
-@dispatcher.message(F.text == "⚙️ Настройки цен")
+@dispatcher.message(F.text == "⚙️ Настройки")
 async def on_settings_menu(message: Message) -> None:
-    await message.answer("Выберите категорию, чтобы изменить цены:", reply_markup=_settings_keyboard())
+    await message.answer("Выберите услугу для изменения цены на сайте:", reply_markup=_settings_keyboard())
 
 
 @dispatcher.callback_query(F.data.startswith("orders:page:"))
@@ -246,19 +248,7 @@ async def on_archive_page(callback: CallbackQuery) -> None:
     chunk = leads[start : start + PAGE_SIZE]
     await callback.message.edit_text(
         _archive_page_text(chunk, safe_page, total_pages),
-        reply_markup=_archive_page_keyboard(safe_page, total_pages) if total_pages > 1 else None,
-    )
-    await callback.answer()
-
-
-@dispatcher.callback_query(F.data.startswith("settings:cat:"))
-async def on_settings_category(callback: CallbackQuery) -> None:
-    if callback.data is None or callback.message is None:
-        return
-    category_key = callback.data.split(":")[-1]
-    await callback.message.edit_text(
-        "Выберите услугу для изменения цены:",
-        reply_markup=_category_items_keyboard(category_key),
+        reply_markup=_archive_page_keyboard(safe_page, total_pages),
     )
     await callback.answer()
 
@@ -267,9 +257,17 @@ async def on_settings_category(callback: CallbackQuery) -> None:
 async def on_settings_item(callback: CallbackQuery) -> None:
     if callback.data is None or callback.message is None or callback.from_user is None:
         return
-    _, _, category_key, item_title = callback.data.split(":", 3)
-    pending_price_updates[callback.from_user.id] = (category_key, item_title)
-    await callback.message.answer(f"Введите новую цену для '{item_title}' (только число, например 3200):")
+    _, _, category_key, item_key = callback.data.split(":", 3)
+    _, services = _services_prices()
+    service = services.get(item_key)
+    if service is None:
+        await callback.answer("Услуга не найдена", show_alert=True)
+        return
+    item_title, old_price = service
+    pending_price_updates[callback.from_user.id] = (category_key, item_key, item_title)
+    await callback.message.answer(
+        f"Текущая цена: {item_title} — {old_price} ₽\nВведите новую цену (только число):"
+    )
     await callback.answer()
 
 
@@ -280,17 +278,20 @@ async def on_new_price_value(message: Message) -> None:
     pending = pending_price_updates.get(message.from_user.id)
     if pending is None:
         return
-    category_key, item_title = pending
+    category_key, item_key, item_title = pending
     new_price = int(message.text or "0")
     if new_price <= 0:
         await message.answer("Цена должна быть больше 0.")
         return
-    ok = update_service_price(category_key, item_title, new_price)
+    ok = update_service_price(category_key, item_key, new_price)
     if not ok:
         await message.answer("Не удалось обновить цену: услуга не найдена.")
         return
     pending_price_updates.pop(message.from_user.id, None)
-    await message.answer(f"Цена обновлена: {item_title} -> {new_price} ₽")
+    await message.answer(
+        f"Цена обновлена: {item_title} -> {new_price} ₽",
+        reply_markup=_settings_keyboard(),
+    )
 
 
 @dispatcher.callback_query(F.data.startswith("done:"))
@@ -311,6 +312,43 @@ async def on_done(callback: CallbackQuery) -> None:
                 f"✅ Заказ {lead.id} завершен",
             )
     await callback.answer("Готово")
+
+
+@dispatcher.callback_query(F.data.startswith("restore:"))
+async def on_restore(callback: CallbackQuery) -> None:
+    if callback.data is None or callback.message is None:
+        return
+    lead_id = callback.data.split(":", 1)[1]
+    lead = mark_lead_active(lead_id)
+    if lead is None:
+        await callback.answer("Заявка не найдена", show_alert=True)
+        return
+
+    # Refresh current archive page after restore.
+    page = 1
+    if callback.message.reply_markup:
+        # Try to derive current page from message text.
+        text = callback.message.text or ""
+        marker = "Страница "
+        if marker in text:
+            try:
+                page = int(text.split(marker, 1)[1].split("/", 1)[0])
+            except Exception:  # noqa: BLE001
+                page = 1
+    leads = list_archived_leads()
+    if not leads:
+        await callback.message.edit_text("Архив пуст.")
+        await callback.answer("Перенесено в активные")
+        return
+    total_pages = (len(leads) + PAGE_SIZE - 1) // PAGE_SIZE
+    safe_page = max(1, min(page, total_pages))
+    start = (safe_page - 1) * PAGE_SIZE
+    chunk = leads[start : start + PAGE_SIZE]
+    await callback.message.edit_text(
+        _archive_page_text(chunk, safe_page, total_pages),
+        reply_markup=_archive_page_keyboard(safe_page, total_pages),
+    )
+    await callback.answer("Перенесено в активные")
 
 
 async def run_polling() -> None:

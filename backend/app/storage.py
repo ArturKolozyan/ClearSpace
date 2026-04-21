@@ -94,6 +94,25 @@ def mark_lead_done(lead_id: str) -> LeadRecord | None:
     return updated
 
 
+def mark_lead_active(lead_id: str) -> LeadRecord | None:
+    data = _read_leads_raw()
+    updated: LeadRecord | None = None
+    for item in data:
+        if item.get("id") != lead_id:
+            continue
+        if item.get("status") != "done":
+            updated = LeadRecord.model_validate(item)
+            break
+        item["status"] = "new"
+        item["done_at"] = None
+        updated = LeadRecord.model_validate(item)
+        break
+    if updated is None:
+        return None
+    _write_leads_raw(data)
+    return updated
+
+
 def list_active_leads() -> list[LeadRecord]:
     data = _read_leads_raw()
     active = [LeadRecord.model_validate(item) for item in data if item.get("status") != "done"]
@@ -129,7 +148,7 @@ def cleanup_old_archived_leads() -> int:
     return removed
 
 
-def update_service_price(category_key: str, item_title: str, new_price: int) -> bool:
+def update_service_price(category_key: str, item_key: str, new_price: int) -> bool:
     _ensure_data_files()
     data = json.loads(PRICES_PATH.read_text(encoding="utf-8"))
     updated = False
@@ -137,7 +156,7 @@ def update_service_price(category_key: str, item_title: str, new_price: int) -> 
         if category.get("key") != category_key:
             continue
         for item in category.get("items", []):
-            if item.get("title") == item_title:
+            if item.get("key") == item_key:
                 item["price_from"] = new_price
                 updated = True
                 break
