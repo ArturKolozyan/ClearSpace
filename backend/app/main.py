@@ -1,9 +1,11 @@
+import asyncio
+
 from fastapi import BackgroundTasks, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from .schemas import LeadCreate, LeadRecord, PriceCategory
 from .storage import append_lead, read_prices
-from .telegram_notifier import notify_owner
+from .telegram_notifier import close_bot, notify_owner, run_polling
 
 app = FastAPI(title="ClearSpace API", version="1.0.0")
 
@@ -19,6 +21,19 @@ app.add_middleware(
 @app.get("/api/health")
 async def healthcheck() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.on_event("startup")
+async def startup_event() -> None:
+    app.state.polling_task = asyncio.create_task(run_polling())
+
+
+@app.on_event("shutdown")
+async def shutdown_event() -> None:
+    polling_task = getattr(app.state, "polling_task", None)
+    if polling_task:
+        polling_task.cancel()
+    await close_bot()
 
 
 @app.get("/api/prices", response_model=list[PriceCategory])

@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -24,3 +25,6 @@ class LeadCreate(BaseModel):
 class LeadRecord(LeadCreate):
     id: str
     created_at: datetime
+    status: Literal["new", "done"] = "new"
+    done_at: datetime | None = None
+    tg_message_id: int | None = None
