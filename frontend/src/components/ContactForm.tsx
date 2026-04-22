@@ -12,7 +12,7 @@ export default function ContactForm() {
   });
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
-  const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
+  const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "";
 
   const formatPhoneNumber = (value: string) => {
     if (!value) return "+7 ";

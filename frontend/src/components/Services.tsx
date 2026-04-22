@@ -57,7 +57,7 @@ type ApiPriceCategory = {
 
 export default function Services() {
   const [prices, setPrices] = useState<Record<string, number>>({});
-  const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
+  const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "";
 
   useEffect(() => {
     const controller = new AbortController();
