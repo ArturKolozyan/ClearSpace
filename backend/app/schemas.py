@@ -29,3 +29,7 @@ class LeadRecord(LeadCreate):
     status: Literal["new", "done"] = "new"
     done_at: datetime | None = None
     tg_message_id: int | None = None
+
+
+class AppSettings(BaseModel):
+    contact_phone: str = Field(min_length=6, max_length=50)

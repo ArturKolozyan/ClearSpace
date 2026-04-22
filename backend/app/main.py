@@ -4,8 +4,8 @@ from fastapi import BackgroundTasks, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
-from .schemas import LeadCreate, LeadRecord, PriceCategory
-from .storage import append_lead, read_prices
+from .schemas import AppSettings, LeadCreate, LeadRecord, PriceCategory
+from .storage import append_lead, read_contact_phone, read_prices
 from .telegram_notifier import cleanup_archived_daily, close_bot, notify_owner, run_polling
 
 app = FastAPI(title="ClearSpace API", version="1.0.0")
@@ -47,6 +47,14 @@ async def get_prices() -> list[PriceCategory]:
         return read_prices()
     except FileNotFoundError as exc:
         raise HTTPException(status_code=500, detail="prices.json not found") from exc
+
+
+@app.get("/api/settings", response_model=AppSettings)
+async def get_settings() -> AppSettings:
+    try:
+        return AppSettings(contact_phone=read_contact_phone())
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=500, detail="Failed to load settings") from exc
 
 
 @app.post("/api/leads", response_model=LeadRecord)

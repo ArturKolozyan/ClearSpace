@@ -13,8 +13,10 @@ from .storage import (
     list_archived_leads,
     mark_lead_active,
     mark_lead_done,
+    read_contact_phone,
     read_prices,
     set_tg_message_id,
+    update_contact_phone,
     update_service_price,
 )
 
@@ -22,6 +24,7 @@ bot = Bot(token=settings.bot_token)
 dispatcher = Dispatcher()
 PAGE_SIZE = 5
 pending_price_updates: dict[int, tuple[str, str, str]] = {}
+pending_contact_phone_updates: set[int] = set()
 
 
 def _sticker_number(index: int) -> str:
@@ -168,6 +171,7 @@ def _services_prices() -> tuple[str, dict[str, tuple[str, int]]]:
 
 def _settings_keyboard() -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
+    keyboard.button(text="📞 Контактный телефон", callback_data="settings:contact_phone")
     category_key, services = _services_prices()
     for item_key, (title, price) in services.items():
         keyboard.button(text=f"{title} ({price} ₽)", callback_data=f"settings:item:{category_key}:{item_key}")
@@ -271,6 +275,19 @@ async def on_settings_item(callback: CallbackQuery) -> None:
     await callback.answer()
 
 
+@dispatcher.callback_query(F.data == "settings:contact_phone")
+async def on_settings_contact_phone(callback: CallbackQuery) -> None:
+    if callback.message is None or callback.from_user is None:
+        return
+    current_phone = read_contact_phone()
+    pending_contact_phone_updates.add(callback.from_user.id)
+    await callback.message.answer(
+        "Введите новый контактный номер для сайта.\n"
+        f"Текущий номер: {current_phone}"
+    )
+    await callback.answer()
+
+
 @dispatcher.message(F.text.regexp(r"^\d+$"))
 async def on_new_price_value(message: Message) -> None:
     if message.from_user is None:
@@ -290,6 +307,25 @@ async def on_new_price_value(message: Message) -> None:
     pending_price_updates.pop(message.from_user.id, None)
     await message.answer(
         f"Цена обновлена: {item_title} -> {new_price} ₽",
+        reply_markup=_settings_keyboard(),
+    )
+
+
+@dispatcher.message(F.text)
+async def on_new_contact_phone(message: Message) -> None:
+    if message.from_user is None:
+        return
+    if message.from_user.id not in pending_contact_phone_updates:
+        return
+    phone = (message.text or "").strip()
+    digits = "".join(ch for ch in phone if ch.isdigit())
+    if len(digits) < 11:
+        await message.answer("Введите корректный номер телефона (минимум 11 цифр).")
+        return
+    updated_phone = update_contact_phone(phone)
+    pending_contact_phone_updates.discard(message.from_user.id)
+    await message.answer(
+        f"Контактный номер обновлен: {updated_phone}",
         reply_markup=_settings_keyboard(),
     )
 

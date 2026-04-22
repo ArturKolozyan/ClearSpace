@@ -10,12 +10,19 @@ from .schemas import LeadCreate, LeadRecord, PriceCategory
 DATA_DIR = Path(settings.data_dir)
 PRICES_PATH = DATA_DIR / "prices.json"
 LEADS_PATH = DATA_DIR / "leads.json"
+SETTINGS_PATH = DATA_DIR / "settings.json"
+DEFAULT_CONTACT_PHONE = "+7 (800) 000-00-00"
 
 
 def _ensure_data_files() -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     if not LEADS_PATH.exists():
         LEADS_PATH.write_text("[]", encoding="utf-8")
+    if not SETTINGS_PATH.exists():
+        SETTINGS_PATH.write_text(
+            json.dumps({"contact_phone": DEFAULT_CONTACT_PHONE}, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
 
 
 def read_prices() -> list[PriceCategory]:
@@ -170,3 +177,21 @@ def update_service_price(category_key: str, item_key: str, new_price: int) -> bo
         encoding="utf-8",
     )
     return True
+
+
+def read_contact_phone() -> str:
+    _ensure_data_files()
+    data = json.loads(SETTINGS_PATH.read_text(encoding="utf-8"))
+    phone = str(data.get("contact_phone", "")).strip()
+    return phone or DEFAULT_CONTACT_PHONE
+
+
+def update_contact_phone(new_phone: str) -> str:
+    _ensure_data_files()
+    data = json.loads(SETTINGS_PATH.read_text(encoding="utf-8"))
+    data["contact_phone"] = new_phone.strip()
+    SETTINGS_PATH.write_text(
+        json.dumps(data, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    return data["contact_phone"]

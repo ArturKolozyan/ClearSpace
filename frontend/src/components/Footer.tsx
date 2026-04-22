@@ -1,8 +1,44 @@
+ "use client";
+
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Phone } from "lucide-react";
 
 export default function Footer() {
+  const [contactPhone, setContactPhone] = useState("+7 (800) 000-00-00");
+  const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "";
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const loadSettings = async () => {
+      try {
+        const response = await fetch(`${apiBase}/api/settings`, { signal: controller.signal });
+        if (!response.ok) {
+          return;
+        }
+        const data = (await response.json()) as { contact_phone?: string };
+        const nextPhone = data.contact_phone?.trim();
+        if (nextPhone) {
+          setContactPhone(nextPhone);
+        }
+      } catch {
+        // Keep fallback phone if API is unavailable.
+      }
+    };
+
+    void loadSettings();
+    return () => controller.abort();
+  }, [apiBase]);
+
+  const telHref = useMemo(() => {
+    const normalized = contactPhone.startsWith("+")
+      ? `+${contactPhone.slice(1).replace(/[^\d]/g, "")}`
+      : contactPhone.replace(/[^\d]/g, "");
+    return `tel:${normalized}`;
+  }, [contactPhone]);
+
   return (
     <footer className="bg-slate-900 text-slate-300 py-16 border-t border-slate-800">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -56,7 +92,7 @@ export default function Footer() {
               <li className="flex flex-col md:flex-row items-center md:items-start gap-3">
                 <Phone size={20} className="text-brand-blue shrink-0 mt-0.5" />
                 <div className="text-center md:text-left">
-                  <a href="tel:+78000000000" className="text-sm hover:text-brand-blue transition-colors block mb-1">+7 (800) 000-00-00</a>
+                  <a href={telHref} className="text-sm hover:text-brand-blue transition-colors block mb-1">{contactPhone}</a>
                   <span className="text-xs text-slate-500 block">Ежедневно с 9:00 до 21:00</span>
                 </div>
               </li>
